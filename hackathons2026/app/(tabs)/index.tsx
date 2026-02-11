@@ -6,6 +6,7 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+import MapView from 'react-native-maps';
 
 export default function HomeScreen() {
   return (
@@ -74,6 +75,18 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
+
+      <ThemedView style={styles.mapContainer}>
+  <MapView
+  style={styles.map}
+  initialRegion={{
+    latitude: 13.7563,
+    longitude: 100.5018,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  }}
+/>
+</ThemedView>
     </ParallaxScrollView>
   );
 }
@@ -95,4 +108,15 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
+  mapContainer: {
+  height: 300,          // 👈 REQUIRED
+  width: '100%',
+  marginTop: 16,
+  borderRadius: 12,
+  overflow: 'hidden',
+},
+
+map: {
+  ...StyleSheet.absoluteFillObject,
+},
 });
