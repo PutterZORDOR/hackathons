@@ -1,14 +1,46 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Pressable } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import MapView from 'react-native-maps';
+import * as Location from 'expo-location';
+import { Link, router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function HomeScreen() {
+
+   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+  let subscription: Location.LocationSubscription | null = null;
+
+  (async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMsg('Permission denied');
+      return;
+    }
+
+    subscription = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 2000,
+        distanceInterval: 1,
+      },
+      (newLocation) => {
+        setLocation(newLocation);
+      }
+    );
+  })();
+
+  return () => {
+    subscription?.remove();
+  };
+}, []);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -76,16 +108,41 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
 
+       <ThemedView style={styles.stepContainer}>
+  <Pressable
+    style={styles.button}
+    onPress={() => router.push('/QRscan')}
+  >
+    <ThemedText type="defaultSemiBold" style={styles.buttonText}>
+      Go to Next Page
+    </ThemedText>
+  </Pressable>
+</ThemedView>
+
       <ThemedView style={styles.mapContainer}>
-  <MapView
-  style={styles.map}
-  initialRegion={{
-    latitude: 13.7563,
-    longitude: 100.5018,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  }}
-/>
+  {errorMsg && <ThemedText>{errorMsg}</ThemedText>}
+
+  {location && (
+    <MapView
+      provider={PROVIDER_GOOGLE}
+      style={styles.map}
+      region={{
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }}
+      showsUserLocation
+    >
+      <Marker
+        coordinate={{
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        }}
+        title="You are here"
+      />
+    </MapView>
+  )}
 </ThemedView>
     </ParallaxScrollView>
   );
@@ -118,5 +175,17 @@ const styles = StyleSheet.create({
 
 map: {
   ...StyleSheet.absoluteFillObject,
+},
+
+button: {
+  backgroundColor: '#4CAF50',
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  borderRadius: 8,
+  alignSelf: 'flex-start',
+},
+
+buttonText: {
+  color: 'white',
 },
 });
