@@ -33,7 +33,7 @@ export default function Splash() {
 
    useEffect(() => {
      if (count === 0) {
-    router.replace("/(tabs)");
+    router.replace("/login");
 
   }
   }, [count]);
@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 200,
-    height: 200,
+    width: 290,
+    height: 250,
   },
 
   bottomText: {
