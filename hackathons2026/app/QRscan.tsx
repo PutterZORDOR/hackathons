@@ -65,7 +65,7 @@ export default function QRscan() {
 
         <Pressable
           style={styles.button}
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/home')}
         >
           <ThemedText style={styles.buttonText}>Home</ThemedText>
         </Pressable>

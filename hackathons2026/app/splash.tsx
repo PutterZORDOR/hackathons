@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
+import { TouchableOpacity } from "react-native";
 
 export default function Splash() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -52,17 +53,22 @@ export default function Splash() {
         resizeMode="contain"
       />
 
-      <Animated.Text
-        style={[
-          styles.bottomText,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY }],
-          },
-        ]}
-      >
-        {count} ข้าม
-      </Animated.Text>
+      <Animated.View
+  style={{
+    opacity: fadeAnim,
+    transform: [{ translateY }],
+    position: "absolute",
+    bottom: 40,
+    right: 25,
+  }}
+>
+  <TouchableOpacity onPress={() => router.replace("/home")}>
+    <Text style={styles.bottomText}>
+      {count} ข้าม
+    </Text>
+  </TouchableOpacity>
+  </Animated.View>
+
     </LinearGradient>
   );
 }

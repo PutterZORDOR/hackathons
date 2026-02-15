@@ -11,12 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function Login() {
   const handleLogin = () => {
-    router.replace("/(tabs)");
+    router.replace("/home");
   };
 
   return (
     <ImageBackground
-      source={require("../assets/images/login-bg.jpg")}
+      source={require("../assets/images/login-bg.png")}
       style={styles.container}
       resizeMode="cover"
     >
@@ -66,7 +66,7 @@ export default function Login() {
 
         {/* Terms */}
         <Text style={styles.terms}>
-          เมื่อดำเนินการต่อถือว่าคุณอ่านและเห็นด้วยกับ
+          เมื่อดำเนินการต่อนั้นหมายถึงคุณอ่านและเห็นด้วยกับ
           เงื่อนไขการบริการ และ นโยบายความเป็นส่วนตัว
           และต้องมีอายุ 16 ปีขึ้นไป
         </Text>
