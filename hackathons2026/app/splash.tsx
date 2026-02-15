@@ -62,7 +62,7 @@ export default function Splash() {
     right: 25,
   }}
 >
-  <TouchableOpacity onPress={() => router.replace("/home")}>
+  <TouchableOpacity onPress={() => router.replace("/login")}>
     <Text style={styles.bottomText}>
       {count} ข้าม
     </Text>
