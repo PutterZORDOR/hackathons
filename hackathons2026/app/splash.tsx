@@ -10,7 +10,7 @@ export default function Splash() {
   const [count, setCount] = useState(5);
 
   useEffect(() => {
-    // ✨ Fade + Slide animation
+    //  Fade + Slide animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,

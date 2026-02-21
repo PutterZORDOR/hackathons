@@ -24,7 +24,7 @@ function CustomTabBar() {
       {/* Background bar */}
       <LinearGradient
         colors={["#020012", "#051F3F", "#145EA3"]}
-        style={styles.bar}
+        style={styles.bar}    
       />
 
       {/* White circle cut illusion */}
@@ -32,11 +32,23 @@ function CustomTabBar() {
 
       {/* Center QR Button */}
       <TouchableOpacity
-        style={styles.qrButton}
-        onPress={() => router.push("/QRscan")}
-      >
-        <Ionicons name="qr-code" size={28} color="white" />
-      </TouchableOpacity>
+      style={styles.qrButton}
+      onPress={() => router.replace("/QRscan")}
+>
+  <LinearGradient
+    colors={["#020012", "#051F3F", "#145EA3"]}
+      style={{
+      width: "100%",
+      height: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 36,
+    }}
+  >
+    <Ionicons name="qr-code" size={28} color="white" />
+  </LinearGradient>
+</TouchableOpacity>
+
 
       {/* Icons */}
       <View style={styles.iconRow}>
@@ -101,7 +113,8 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#1F4E95",
+    backgroundColor: "#003c96",
+    overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
     elevation: 10,

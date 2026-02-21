@@ -4,7 +4,7 @@ export default function Layout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // 🔥 ปิด header ทั้งหมด
+        headerShown: false, //  ปิด header ทั้งหมด
       }}
     />
   );

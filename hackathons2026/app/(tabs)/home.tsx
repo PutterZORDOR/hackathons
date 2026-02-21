@@ -44,7 +44,7 @@ export default function Home() {
         <View style={styles.topCards}>
           <View style={styles.rewardCard}>
             <Text style={styles.rewardSmall}>Reward Points</Text>
-            <Text style={styles.rewardBig}>150 UMP</Text>
+            <Text style={styles.rewardBig}>0 UMP</Text>
           </View>
 
           <View style={styles.searchCard}>
@@ -58,7 +58,7 @@ export default function Home() {
       <View style={styles.quickRow}>
         {[
           { label: "Wallet", icon: "wallet" },
-          { label: "Rewards", icon: "gift" },
+          { label: "Um Point", on: "gift" },
           { label: "UM Help", icon: "help-circle" },
           { label: "More", icon: "menu" },
         ].map((item, index) => (
@@ -94,7 +94,7 @@ export default function Home() {
   <View style={styles.infoRow}>
     <View style={styles.creditBox}>
       <Text style={styles.creditLabel}>Credit Balance</Text>
-      <Text style={styles.creditAmount}>฿ 9999.99</Text>
+      <Text style={styles.creditAmount}>฿ 0000.00</Text>
     </View>
 
     <View>
