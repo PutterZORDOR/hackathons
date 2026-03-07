@@ -2,7 +2,7 @@ import { Tabs, useRouter, usePathname } from "expo-router";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { useGlobalSearchParams } from "expo-router";
 function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,6 +52,10 @@ function CustomTabBar() {
 }
 
 export default function TabLayout() {
+  const params = useGlobalSearchParams();
+
+  const hideTabBar = params.confirm === "true";
+
   return (
     <>
       <Tabs
@@ -66,7 +70,7 @@ export default function TabLayout() {
         <Tabs.Screen name="profile" />
       </Tabs>
 
-      <CustomTabBar />
+      {!hideTabBar && <CustomTabBar />}
     </>
   );
 }

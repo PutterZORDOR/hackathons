@@ -32,14 +32,18 @@ export default function QRscan() {
 
   // QR handler
   const handleBarcodeScanned = (result: BarcodeScanningResult) => {
-    if (scanned) return;
+  if (scanned) return;
 
-    setScanned(true);
-    alert(`QR Data: ${result.data}`);
-  };
+  setScanned(true);
+
+  // กลับไปหน้า Home แล้วสั่งให้เปิด confirm
+  router.replace('/(tabs)/home?confirm=true');
+};
 
   return (
+    
     <ThemedView style={styles.root}>
+
 
       {/* Camera (NO CHILDREN) */}
       <CameraView
@@ -72,7 +76,13 @@ export default function QRscan() {
       </ThemedView>
 
     </ThemedView>
+
+    
+
+    
   );
+  
+  
 }
 
 const styles = StyleSheet.create({
