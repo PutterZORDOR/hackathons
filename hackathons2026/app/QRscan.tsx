@@ -1,126 +1,116 @@
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BarcodeScanningResult, CameraView, useCameraPermissions } from 'expo-camera';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Camera, CameraView } from "expo-camera";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function QRscan() {
-  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
-  // Loading state
-  if (!permission) {
+  /* ✅ Request Camera Permission */
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Camera access is needed to scan QR codes"
+        );
+      }
+    })();
+  }, []);
+
+  /* ✅ Handle QR Scan */
+  const handleScan = ({ data }: any) => {
+    if (scanned) return;
+
+    // Validate QR format
+    if (!data.startsWith("BOX_")) {
+      Alert.alert("Invalid QR", "This is not a valid box QR code");
+      return;
+    }
+
+    const cleanBoxId = data.replace("BOX_", "BOX_");
+
+    setScanned(true);
+
+    // Navigate to Result Page
+    router.replace({
+      pathname: "/home",
+      params: { 
+        box_id: cleanBoxId,
+        confirm: "true",
+      },
+    });
+  };
+
+  /* ❌ No Permission */
+  if (hasPermission === false) {
     return (
-      <ThemedView style={styles.center}>
-        <ThemedText>Loading camera permission...</ThemedText>
-      </ThemedView>
+      <View style={styles.center}>
+        <Text>No camera permission</Text>
+      </View>
     );
   }
-
-  // Permission UI
-  if (!permission.granted) {
-    return (
-      <ThemedView style={styles.center}>
-        <ThemedText>Camera permission is required</ThemedText>
-        <Pressable style={styles.button} onPress={requestPermission}>
-          <ThemedText style={styles.buttonText}>Allow Camera</ThemedText>
-        </Pressable>
-      </ThemedView>
-    );
-  }
-
-  // QR handler
-  const handleBarcodeScanned = (result: BarcodeScanningResult) => {
-  if (scanned) return;
-
-  setScanned(true);
-
-  // กลับไปหน้า Home แล้วสั่งให้เปิด confirm
-  router.replace('/(tabs)/home?confirm=true');
-};
 
   return (
-    
-    <ThemedView style={styles.root}>
-
-
-      {/* Camera (NO CHILDREN) */}
+    <View style={{ flex: 1 }}>
       <CameraView
         style={StyleSheet.absoluteFillObject}
-        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        onBarcodeScanned={handleBarcodeScanned}
+        barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+        onBarcodeScanned={handleScan}
       />
 
-      {/* Overlay UI */}
-      <ThemedView style={styles.overlay}>
-        <ThemedText style={styles.overlayText}>
-          Point camera at QR code
-        </ThemedText>
-
-        {scanned && (
-          <Pressable
-            style={styles.button}
-            onPress={() => setScanned(false)}
-          >
-            <ThemedText style={styles.buttonText}>Scan Again</ThemedText>
-          </Pressable>
-        )}
+      <View style={styles.overlay}>
+        <Text style={styles.text}>
+          Scan Box QR to Borrow Umbrella
+        </Text>
 
         <Pressable
-          style={styles.button}
-          onPress={() => router.push('/home')}
+          style={styles.cancelButton}
+          onPress={() => router.back()}
         >
-          <ThemedText style={styles.buttonText}>Home</ThemedText>
+          <Text style={{ color: "#fff" }}>Cancel</Text>
         </Pressable>
-      </ThemedView>
-
-    </ThemedView>
-
-    
-
-    
+      </View>
+    </View>
   );
-  
-  
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
+  overlay: {
+    position: "absolute",
+    bottom: 40,
+    width: "100%",
+    alignItems: "center",
   },
-
+  text: {
+    fontSize: 16,
+    color: "#fff",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  cancelButton: {
+    backgroundColor: "#d9534f",
+    padding: 10,
+    borderRadius: 6,
+    width: 120,
+    alignItems: "center",
+  },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-  },
-
-  overlay: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-
-  overlayText: {
-    color: 'white',
-    textAlign: 'center',
-  },
-
-  button: {
-    backgroundColor: '#1218d2',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-
-  buttonText: {
-    color: 'white',
-    textAlign: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

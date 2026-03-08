@@ -4,12 +4,39 @@ import {
   StyleSheet,
   ImageBackground,
   Pressable,
-  Image,
+  Image, ActivityIndicator
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
+import { API_URL } from "@/config/api";
 
 export default function Login() {
+
+  const [loading, setLoading] = useState(false);
+
+  const handleGuestLogin = async () => {
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/create_guest.php`);
+      const data = await res.json();
+
+      if (data.success) {
+        await AsyncStorage.setItem("user_id", data.user_id);
+        router.replace("/home");
+      } else {
+        alert("Failed to create guest");
+      }
+    } catch (error) {
+      alert("Server error");
+    }
+
+    setLoading(false);
+  };
+
+
   const handleLogin = () => {
     router.replace("/home");
   };
@@ -55,7 +82,7 @@ export default function Login() {
         </Pressable>
 
         {/* Google */}
-        <Pressable style={[styles.button, styles.google]} onPress={handleLogin}>
+        <Pressable style={[styles.button, styles.google]} onPress={handleGuestLogin} disabled={loading}>
           <View style={styles.row}>
             <Ionicons name="logo-google" size={22} color="#3B3C4F" />
             <Text style={styles.buttonTextDark}>

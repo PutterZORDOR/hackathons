@@ -1,36 +1,115 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LockerIcon from "../components/Lockericon";
+import { API_URL } from "@/config/api";
+
+type ApiResponse = {
+  returned: boolean;
+};
 
 export default function PlaceUmbrella() {
 
   const router = useRouter();
+  const { user_id } = useLocalSearchParams();
+
   const [timeLeft, setTimeLeft] = useState(30);
+  const [slotId, setSlotId] = useState("-");
+
+  /* ---------------- TIMER ---------------- */
 
   useEffect(() => {
-  const timer = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 0) return 0;
-      return prev - 1;
-    });
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) return 0;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  /* ---------------- TIMEOUT ---------------- */
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      router.replace("/lock-success-screen");
+    }
+  }, [timeLeft]);
+
+  /* ---------------- CHECK RETURN STATUS ---------------- */
+
+  useEffect(() => {
+
+    if (!user_id) return;
+
+    const interval = setInterval(async () => {
+      try {
+
+        const res = await fetch(
+          `${API_URL}/check_return_status.php?user_id=${user_id}`
+        );
+
+        const data: ApiResponse = await res.json();
+
+        console.log("RETURN CHECK:", data);
+
+        if (data.returned) {
+
+          clearInterval(interval);
+
+          router.replace("/lock-success-screen");
+
+        }
+
+      } catch (err) {
+        console.log("Return check error:", err);
+      }
+
+    }, 2000);
+
+    return () => clearInterval(interval);
+
+  }, [user_id]);
+
+  const formatTime = (sec: number) => {
+    const s = sec.toString().padStart(2, "0");
+    return `00:${s}`;
+  };
+
+  //  show slot_id
+ useEffect(() => {
+
+  if (!user_id) return;
+
+  const interval = setInterval(async () => {
+
+    try {
+
+      const res = await fetch(
+        `${API_URL}/get_return_slot.php?user_id=${user_id}`
+      );
+
+      const data = await res.json();
+
+      console.log("SLOT RESPONSE:", data);
+
+      if (data.success) {
+        setSlotId(data.slot_id);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
   }, 1000);
 
-  return () => clearInterval(timer);
-}, []);
+  return () => clearInterval(interval);
 
-useEffect(() => {
-  if (timeLeft === 0) {
-    router.replace("/lock-success-screen");
-  }
-}, [timeLeft]);
-const formatTime = (sec: number) => {
-  const s = sec.toString().padStart(2, "0");
-  return `00:${s}`;
-};
+}, [user_id]);
+
   return (
-
     <View style={styles.container}>
 
       {/* HEADER */}
@@ -49,7 +128,6 @@ const formatTime = (sec: number) => {
       <View style={styles.iconArea}>
         <LockerIcon size={190} />
 
-        {/* RED LOCK */}
         <View style={styles.lockBadge}>
           <Ionicons name="lock-closed" size={22} color="white" />
         </View>
@@ -57,7 +135,7 @@ const formatTime = (sec: number) => {
 
       {/* SLOT ID */}
       <View style={styles.slotBox}>
-        <Text style={styles.slotText}>A1</Text>
+        <Text style={styles.slotText}>{slotId}</Text>
       </View>
 
       {/* INSTRUCTION */}

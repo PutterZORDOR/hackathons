@@ -1,4 +1,5 @@
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -16,15 +17,18 @@ import { Animated, Easing } from "react-native";
 import Lockericon from "../../components/Lockericon";
 const { width } = Dimensions.get("window");
 import { useRouter } from "expo-router";
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "@/config/api";
 
 export default function Home() {
-  const { confirm } = useLocalSearchParams();
+  const { confirm, box_id } = useLocalSearchParams();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
   const [showPickup, setShowPickup] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(5);
+  const [timeLeft, setTimeLeft] = useState(30);
   const router = useRouter();
   
   const rotate = rotateAnim.interpolate({
@@ -32,6 +36,142 @@ export default function Home() {
   inputRange: [0, 1],
   outputRange: ["-45deg", "-20deg"],
   });
+
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [borrowing, setBorrowing] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const user_id = await AsyncStorage.getItem('user_id');
+
+      if (!user_id) {
+        router.replace('/login');
+      }
+    };
+
+    checkUser();
+  }, []);
+
+  //Check if box_id is the real box
+  useEffect(() => {
+    if (!box_id) return;
+
+    fetch(`${API_URL}/check_box.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ box_id }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setMessage(`Box found. Status: ${data.box.status}`);
+        } else {
+          setMessage(data.message);
+        }
+      })
+      .catch(() => setMessage("Server error"))
+      .finally(() => setLoading(false));
+  }, [box_id]);
+
+  //ส่งให้หลังบ้าน
+  const useUmbrella = async () => {
+    if (!box_id) return;
+
+    const user_id = await AsyncStorage.getItem("user_id");
+
+    console.log("Borrow request:", { user_id, box_id });
+
+    if (!user_id) {
+      Alert.alert("Error", "User not found");
+      return;
+    }
+
+    setBorrowing(true);
+
+    try {
+      console.log("Sending:", { user_id, box_id });
+      const res = await fetch(`${API_URL}/borrow_umbrella.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id,
+          box_id,
+        }),
+      });
+
+      const data = await res.json();
+      
+
+      if (data.success) {
+        setMessage(
+          `Umbrella ${data.umbrella_id} borrowed successfully`
+        );
+
+      } else {
+        setMessage(data.message);
+      }
+
+    } catch {
+      setMessage("Server error");
+    }
+
+    setBorrowing(false);
+  };
+
+  const checkBorrow = async () => {
+  const user_id = await AsyncStorage.getItem("user_id");
+
+  try {
+    const res = await fetch(
+      `${API_URL}/check_borrow_status.php?user_id=${user_id}`
+    );
+
+    const data = await res.json();
+
+    console.log("CHECK BORROW RESPONSE:", data);
+
+    if (data.borrowed) {
+      console.log("Umbrella taken:", data.umbrella_id);
+      setShowPickup(false);
+      router.replace("/borrow");
+    }
+
+  } catch (err) {
+    console.log("Check borrow error:", err);
+  }
+};
+
+
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission denied');
+        return;
+      }
+
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 2000,
+          distanceInterval: 1,
+        },
+        (newLocation) => {
+          setLocation(newLocation);
+        }
+      );
+    })();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (confirm === "true") {
@@ -58,18 +198,30 @@ export default function Home() {
 useEffect(() => {
   if (!showPickup) return;
 
-  if (timeLeft === 0) {
-    setShowPickup(false);
-    router.push("/borrow");
-    return;
-  }
+  console.log("Start checking borrow status...");
+
+  const interval = setInterval(() => {
+    console.log("Checking borrow status...");
+    checkBorrow();
+  }, 2000);
 
   const timer = setInterval(() => {
     setTimeLeft(prev => prev - 1);
   }, 1000);
 
-  return () => clearInterval(timer);
-}, [showPickup, timeLeft]);
+  return () => {
+    clearInterval(interval);
+    clearInterval(timer);
+    console.log("Stop checking borrow status");
+  };
+}, [showPickup]);
+
+useEffect(() => {
+  if (timeLeft <= 0 && showPickup) {
+    setShowPickup(false);
+    router.push("/borrow");
+  }
+}, [timeLeft]);
 
   return (
     <View style={[styles.container, { position: "relative" }]}>
@@ -127,20 +279,24 @@ useEffect(() => {
 
   {/* MAP */}
   <View style={styles.mapWrapper}>
-    <MapView
-      style={styles.map}
-      initialRegion={{
-        latitude: 13.7563,
-        longitude: 100.5018,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+    { location && (
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={{
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
       }}
+      showsUserLocation
     >
       <Marker
         coordinate={{ latitude: 13.7563, longitude: 100.5018 }}
         title="Umbrella Station"
       />
-    </MapView>
+    </MapView>)}
+    
   </View>
 
   {/* CREDIT + HELP */}
@@ -183,11 +339,14 @@ useEffect(() => {
               onPress={() => {
               setShowConfirm(false);
 
+              useUmbrella(); //ส่งให้หลังบ้าน update db เพื่อยืมร่ม
+
               setTimeout(() => {
                 setShowSuccess(true);
 
               setTimeout(() => {
                 setShowSuccess(false);
+                setTimeLeft(30);
                 setShowPickup(true);
               }, 2000); // แสดง success 1 วิ
             }, 300);
@@ -289,6 +448,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F1F1F1",
+    overflow: "visible",
   },
 
   header: {
@@ -454,6 +614,7 @@ overlayContainer: {
   right: 0,
   bottom: 0,
   zIndex: 999,
+  elevation: 999,
   justifyContent: "flex-end",
 },
 

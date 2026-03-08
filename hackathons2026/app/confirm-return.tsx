@@ -2,11 +2,57 @@ import { View, Text, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@/config/api";
+import { useLocalSearchParams } from "expo-router"; 
 
 export default function ConfirmReturn() {
 
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState(30);
+  const { box_id, user_id } = useLocalSearchParams();
+  const [startTime] = useState(Date.now());
+
+
+  const checkRFID = async () => {
+  try {
+
+    const res = await fetch(
+      `${API_URL}/check_rfid_event.php?box_id=${box_id}&since=${startTime}`
+    );
+
+    const data = await res.json();
+
+    console.log("RFID EVENT:", data);
+
+    if (data.scanned) {
+      console.log("RFID detected:", data.umbrella_id);
+
+      router.replace({
+        pathname: "/place-umbrella",
+        params: { user_id }
+      });
+    }
+
+  } catch (err) {
+    console.log("RFID check error:", err);
+  }
+};
+
+useEffect(() => {
+
+  const interval = setInterval(() => {
+
+    checkRFID();
+
+    console.log("Checking RFID event...");
+    checkRFID();
+
+  }, 2000); // every 2 seconds
+
+  return () => clearInterval(interval);
+
+}, []);
 
 useEffect(() => {
   const timer = setInterval(() => {
@@ -21,7 +67,10 @@ useEffect(() => {
 
 useEffect(() => {
   if (timeLeft === 0) {
-    router.replace("/place-umbrella");
+    router.replace({
+      pathname: "/place-umbrella",
+      params: { user_id }
+    });
   }
 }, [timeLeft]);
 const formatTime = (sec: number) => {
