@@ -203,7 +203,7 @@ useEffect(() => {
   const interval = setInterval(() => {
     console.log("Checking borrow status...");
     checkBorrow();
-  }, 2000);
+  }, 1500);
 
   const timer = setInterval(() => {
     setTimeLeft(prev => prev - 1);

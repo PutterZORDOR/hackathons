@@ -1,10 +1,8 @@
-import { View, Text, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/config/api";
-import { useLocalSearchParams } from "expo-router"; 
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function ConfirmReturn() {
 
@@ -48,7 +46,7 @@ useEffect(() => {
     console.log("Checking RFID event...");
     checkRFID();
 
-  }, 2000); // every 2 seconds
+  }, 1800); // every 2 seconds
 
   return () => clearInterval(interval);
 
@@ -60,7 +58,7 @@ useEffect(() => {
       if (prev <= 0) return 0;
       return prev - 1;
     });
-  }, 1000);
+  }, 2000);
 
   return () => clearInterval(timer);
 }, []);
