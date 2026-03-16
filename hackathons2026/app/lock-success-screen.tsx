@@ -9,7 +9,8 @@ Animated,
 SafeAreaView
 } from "react-native";
 import { router } from "expo-router";
-
+import { Image } from "react-native";
+import correct from "../assets/images/correct.png";
 export default function LockSuccessScreen() {
 
 const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -44,9 +45,7 @@ styles.successCircle,
 { transform: [{ scale: scaleAnim }] }
 ]}
 >
-
-<Text style={styles.check}>✓</Text>
-
+<Image source={correct} style={styles.correctImg} />
 </Animated.View>
 
 <Text style={styles.percent}>100%</Text>
@@ -107,10 +106,6 @@ alignItems:"center"
 },
 
 successCircle:{
-width:185,
-height:185,
-borderRadius:92,
-backgroundColor:"#34C759",
 justifyContent:"center",
 alignItems:"center"
 },
@@ -153,6 +148,11 @@ textAlign:"center",
 fontSize:12,
 lineHeight:16,
 color:"#000"
-}
+},
 
+correctImg:{
+width:300,
+height:200,
+resizeMode:"contain"
+}
 });

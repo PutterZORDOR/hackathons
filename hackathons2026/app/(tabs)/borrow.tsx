@@ -77,26 +77,6 @@ export default function Borrow() {
         </View>
       </View>
 
-      {/* LOCATE BUTTON */}
-      <TouchableOpacity
-        style={styles.locateBtn}
-        onPress={() => setIsFullMap(!isFullMap)}
-        >
-        <Ionicons
-        name={isFullMap ? "contract" : "expand"}
-        size={24}
-        color="white"
-  />
-</TouchableOpacity>
-    {isFullMap && (
-    <TouchableOpacity
-        style={styles.fullBackBtn}
-        onPress={() => setIsFullMap(false)}
-  >
-    <Ionicons name="arrow-back" size={24} color="white" />
-  </TouchableOpacity>
-)}
-
       {/* BOTTOM PANEL */}
       <View style={styles.bottomPanel}>
         <View style={styles.handle} />

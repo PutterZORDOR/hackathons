@@ -35,16 +35,16 @@ function CustomTabBar() {
         style={styles.qrButton}
         onPress={() => router.push("/QRscan")}
       >
-        <Ionicons name="qr-code" size={28} color="white" />
+        <Ionicons name="scan" size={35} color="white" />
       </TouchableOpacity>
 
       {/* Icons */}
       <View style={styles.iconRow}>
         <TabItem icon="home" route="/home" />
-        <TabItem icon="cloud" route="/weather" />
+        <TabItem icon="cloud" route="/home" />
         <View style={{ width: 50 }} />
-        <TabItem icon="pulse" route="/activity" />
-        <TabItem icon="person" route="/profile" />
+        <TabItem icon="time-outline" route="/home" />
+        <TabItem icon="person" route="/home" />
       </View>
     </View>
     
@@ -52,9 +52,18 @@ function CustomTabBar() {
 }
 
 export default function TabLayout() {
+
+  const pathname = usePathname();
+
   const params = useGlobalSearchParams();
 
-  const hideTabBar = params.confirm === "true";
+const hideTabBar =
+  pathname.includes("borrow") ||
+  params.overlay === "true";
+  
+
+
+  
 
   return (
     <>
@@ -105,14 +114,14 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#1F4E95",
+    backgroundColor: "#153565",
     justifyContent: "center",
     alignItems: "center",
     elevation: 10,
   },
   iconRow: {
     position: "absolute",
-    bottom: 27,
+    bottom: 30,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-around",

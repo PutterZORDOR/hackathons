@@ -9,17 +9,25 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { Ionicons,} from "@expo/vector-icons";
 import React, { useState,useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { Animated, Easing } from "react-native";
-import Lockericon from "../../components/Lockericon";
 const { width } = Dimensions.get("window");
 import { useRouter } from "expo-router";
+<<<<<<< Updated upstream
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from "@/config/api";
+=======
+<<<<<<< HEAD
+const LockerImage = require("../../assets/images/locker_check.png");
+=======
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "@/config/api";
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
+>>>>>>> Stashed changes
 
 export default function Home() {
   const { confirm, box_id } = useLocalSearchParams();
@@ -30,6 +38,24 @@ export default function Home() {
   const [showPickup, setShowPickup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const router = useRouter();
+
+    const banners = [
+    require("../../assets/images/banner1.jpg"),
+    require("../../assets/images/banner2.jpg"),
+    require("../../assets/images/banner3.jpg"),
+    require("../../assets/images/banner4.jpg"),
+    require("../../assets/images/banner5.jpg"),
+  ];
+
+  const [bannerIndex, setBannerIndex] = useState(0);
+
+  useEffect(() => {
+  const timer = setInterval(() => {
+    setBannerIndex((prev) => (prev + 1) % banners.length);
+  }, 3000);
+
+  return () => clearInterval(timer);
+  }, []);
   
   const rotate = rotateAnim.interpolate({
     
@@ -44,6 +70,138 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [borrowing, setBorrowing] = useState(false);
 
+<<<<<<< Updated upstream
+  useEffect(() => {
+    const checkUser = async () => {
+      const user_id = await AsyncStorage.getItem('user_id');
+
+      if (!user_id) {
+        router.replace('/login');
+      }
+    };
+
+    checkUser();
+  }, []);
+
+  //Check if box_id is the real box
+  useEffect(() => {
+    if (!box_id) return;
+
+    fetch(`${API_URL}/check_box.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ box_id }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setMessage(`Box found. Status: ${data.box.status}`);
+        } else {
+          setMessage(data.message);
+        }
+      })
+      .catch(() => setMessage("Server error"))
+      .finally(() => setLoading(false));
+  }, [box_id]);
+
+  //ส่งให้หลังบ้าน
+  const useUmbrella = async () => {
+    if (!box_id) return;
+
+    const user_id = await AsyncStorage.getItem("user_id");
+
+    console.log("Borrow request:", { user_id, box_id });
+
+    if (!user_id) {
+      Alert.alert("Error", "User not found");
+      return;
+    }
+
+    setBorrowing(true);
+
+    try {
+      console.log("Sending:", { user_id, box_id });
+      const res = await fetch(`${API_URL}/borrow_umbrella.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id,
+          box_id,
+        }),
+      });
+
+      const data = await res.json();
+      
+
+      if (data.success) {
+        setMessage(
+          `Umbrella ${data.umbrella_id} borrowed successfully`
+        );
+
+      } else {
+        setMessage(data.message);
+      }
+
+    } catch {
+      setMessage("Server error");
+    }
+
+    setBorrowing(false);
+  };
+
+  const checkBorrow = async () => {
+  const user_id = await AsyncStorage.getItem("user_id");
+
+  try {
+    const res = await fetch(
+      `${API_URL}/check_borrow_status.php?user_id=${user_id}`
+    );
+
+    const data = await res.json();
+
+    console.log("CHECK BORROW RESPONSE:", data);
+
+    if (data.borrowed) {
+      console.log("Umbrella taken:", data.umbrella_id);
+      setShowPickup(false);
+      router.replace("/borrow");
+    }
+
+  } catch (err) {
+    console.log("Check borrow error:", err);
+  }
+};
+
+
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission denied');
+        return;
+      }
+
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 2000,
+          distanceInterval: 1,
+        },
+        (newLocation) => {
+          setLocation(newLocation);
+        }
+      );
+    })();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
+=======
+>>>>>>> Stashed changes
   useEffect(() => {
     const checkUser = async () => {
       const user_id = await AsyncStorage.getItem('user_id');
@@ -174,10 +332,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (confirm === "true") {
-      setShowConfirm(true);
-    }
-  }, [confirm]);
+  if (confirm === "true") {
+    setShowConfirm(true);
+    router.setParams({ overlay: "true" });
+  }
+}, [confirm]);
   useEffect(() => {
   if (showSuccess) {
     Animated.spring(scaleAnim, {
@@ -239,24 +398,34 @@ useEffect(() => {
           </View>
 
           <View style={styles.headerIcons}>
-            <Ionicons name="time-outline" size={24} color="white" />
             <Ionicons name="notifications" size={24} color="white" />
             <Ionicons name="settings" size={24} color="white" />
           </View>
         </View>
 
-        {/* Reward + Search */}
-        <View style={styles.topCards}>
-          <View style={styles.rewardCard}>
-            <Text style={styles.rewardSmall}>Reward Points</Text>
-            <Text style={styles.rewardBig}>150 UMP</Text>
-          </View>
-
-          <View style={styles.searchCard}>
-            <Ionicons name="search" size={18} />
-            <Text style={{ marginLeft: 6 }}>Search</Text>
-          </View>
-        </View>
+       <View style={styles.topCards}>
+  {/* Reward */}
+  <View style={styles.rewardCard}>
+    <Text style={styles.rewardSmall}>Reward Points</Text>
+    <Text style={styles.rewardBig}>150 UMP</Text>
+    <Ionicons
+      name="gift"
+      size={22}
+      color="#17468C"
+      style={{ position: "absolute", right: 10, top: 15 }}
+    />
+  </View>
+  {/* Credit */}
+  <View style={styles.creditTopCard}>
+    <Text style={styles.rewardSmall}>Credit Balance</Text>
+    <Text style={styles.rewardBig}>฿ 9999.99</Text>
+    <Ionicons
+      name="wallet"
+      size={22}
+      color="#17468C"
+      style={{ position: "absolute", right: 10, top: 15 }}/>
+      </View>
+      </View>
       </LinearGradient>
 
       {/* QUICK BUTTONS */}
@@ -274,9 +443,56 @@ useEffect(() => {
         ))}
       </View>
 
-    {/* WHITE MAIN CARD */}
+
+{/* ACTIVITY BANNER (แยกออกจาก card) */}
+<View style={styles.activitySection}>
+
+<Text style={styles.activityTitle}>
+กิจกรรม/การแจ้งเตือนล่าสุด
+</Text>
+
+<Image
+source={banners[bannerIndex]}
+style={styles.banner}
+/>
+
+<View style={styles.dots}>
+{banners.map((_, i) => (
+<View
+key={i}
+style={[
+styles.dot,
+bannerIndex === i && styles.activeDot,
+]}
+/>
+))}
+</View>
+
+</View>
+
+
+{/* WHITE MAIN CARD */}
 <View style={styles.mainCard}>
 
+<<<<<<< HEAD
+{/* MAP */}
+<View style={styles.mapWrapper}>
+<MapView
+style={styles.map}
+initialRegion={{
+latitude: 13.7563,
+longitude: 100.5018,
+latitudeDelta: 0.01,
+longitudeDelta: 0.01,
+}}
+>
+<Marker
+coordinate={{ latitude: 13.7563, longitude: 100.5018 }}
+title="Umbrella Station"
+/>
+</MapView>
+</View>
+=======
   {/* MAP */}
   <View style={styles.mapWrapper}>
     { location && (
@@ -311,6 +527,7 @@ useEffect(() => {
       <Text style={styles.sideLink}>Parking station</Text>
     </View>
   </View>
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
 
 </View>
             {/* CONFIRM OVERLAY */}
@@ -368,13 +585,6 @@ useEffect(() => {
 
       <Text style={styles.successTitle}>ปลดล็อกแล้ว</Text>
 
-      {/* Floating Dots */}
-      <View style={styles.floatingContainer}>
-        {[...Array(8)].map((_, i) => (
-          <View key={i} style={styles.floatingDot} />
-        ))}
-      </View>
-
       {/* Animated Lock */}
       <Animated.View
         style={{
@@ -409,16 +619,15 @@ useEffect(() => {
         โปรดนำร่มออกจากตู้
       </Text>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: 20 , alignItems: "center"  }}>
+        <View style={styles.floatingContainer}>
+    </View>
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-        <Lockericon size={180} />
-        </Animated.View>
-        <Ionicons
-          name="lock-open"
-          size={50}
-          color="#00FF44"
-          style={{ position: "absolute", right: 30, bottom: 50 }}
-        />
+  <Image
+    source={LockerImage}
+    style={{ width: 300, height: 205, resizeMode: "contain", alignSelf: "center",}}
+    />
+  </Animated.View>
       </View>
 
       <View style={styles.timerBox}>
@@ -446,10 +655,17 @@ useEffect(() => {
 }
 const styles = StyleSheet.create({
   container: {
+<<<<<<< HEAD
+  flex: 1,
+  backgroundColor: "#F1F1F1",
+  paddingBottom: 90,
+},
+=======
     flex: 1,
     backgroundColor: "#F1F1F1",
     overflow: "visible",
   },
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
 
   header: {
     paddingTop: 50,
@@ -483,7 +699,6 @@ const styles = StyleSheet.create({
 
   topCards: {
     flexDirection: "row",
-    marginTop: 20,
     gap: 10,
   },
 
@@ -509,7 +724,7 @@ const styles = StyleSheet.create({
   quickRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginTop: 20,
+    marginTop: -10,
   },
 
   quickButton: {
@@ -569,7 +784,7 @@ logoImage: {
   resizeMode: "contain",
 },
 mainCard: {
-  marginTop: 20,
+  marginTop: 10,
   marginHorizontal: 20,
   backgroundColor: "white",
   borderRadius: 30,
@@ -578,7 +793,7 @@ mainCard: {
 },
 
 mapWrapper: {
-  height: 280,
+  height: 250,
   borderRadius: 25,
   overflow: "hidden",
 },
@@ -686,23 +901,10 @@ percentClean: {
 
 floatingContainer: {
   position: "absolute",
-  width: "100%",
-  height: 250,
-  alignItems: "center",
-  justifyContent: "center",
+  width: 260,
+  height: 220,
+  alignSelf: "center",
 },
-
-floatingDot: {
-  position: "absolute",
-  width: 14,
-  height: 14,
-  borderRadius: 7,
-  backgroundColor: "#A5D6A7",
-  opacity: 0.7,
-  top: Math.random() * 200,
-  left: Math.random() * 250,
-},
-
 successDesc: {
   fontSize: 14,
   color: "#555",
@@ -736,6 +938,55 @@ timerText: {
   fontSize: 36,
   fontWeight: "700",
   color: "#FF0000",
+},
+
+creditTopCard: {
+  flex: 1,
+  backgroundColor: "white",
+  padding: 12,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#D1D3E6",
+  elevation: 4,
+},
+
+activitySection: {
+  marginTop: 5,
+  marginHorizontal: 20,
+},
+
+activityTitle: {
+  fontSize: 12,
+  fontWeight: "bold",
+  color: "#8A8A8A",
+  marginBottom: 5,
+},
+
+banner: {
+  width: "100%",
+  height: 160,
+  borderRadius: 20,
+  elevation: 6,
+},
+
+dots: {
+  flexDirection: "row",
+  justifyContent: "flex-end",
+  marginTop: 6,
+  gap: 6,
+},
+
+dot: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+  borderWidth: 1,
+  borderColor: "#000",
+},
+
+activeDot: {
+  backgroundColor: "#17468C",
+  borderWidth: 0,
 },
 
 });

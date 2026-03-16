@@ -58,6 +58,19 @@ export default function Login() {
 
       {/* Bottom Section */}
       <View style={styles.bottomContainer}>
+
+        {/* Guest Login */}
+      <Pressable
+      style={[styles.button, styles.guest]}
+      onPress={handleLogin}>
+      <View style={styles.row}>
+      <Ionicons name="person" size={22} color="white" />
+      <Text style={styles.buttonTextWhite}>
+      {"  "}ล็อกอินด้วยบัญชีชั่วคราว
+      </Text>
+    </View>
+    </Pressable>
+        
         {/* Apple */}
         <Pressable style={[styles.button, styles.apple]} onPress={handleLogin}>
           <View style={styles.row}>
@@ -159,6 +172,9 @@ const styles = StyleSheet.create({
   google: {
     backgroundColor: "#F8F8F8",
   },
+  guest: {
+  backgroundColor: "#757575",
+},
 
   buttonTextWhite: {
     color: "white",

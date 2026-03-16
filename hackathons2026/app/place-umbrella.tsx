@@ -2,12 +2,22 @@ import { View, Text, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+<<<<<<< HEAD
+import { Image } from "react-native";
+import lockLocker from "../assets/images/lock_locker.png";
+import led from "../assets/images/led.png";
+import { TouchableOpacity } from "react-native";
+=======
 import LockerIcon from "../components/Lockericon";
 import { API_URL } from "@/config/api";
 
 type ApiResponse = {
   returned: boolean;
 };
+<<<<<<< Updated upstream
+=======
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
+>>>>>>> Stashed changes
 
 export default function PlaceUmbrella() {
 
@@ -15,9 +25,19 @@ export default function PlaceUmbrella() {
   const { user_id } = useLocalSearchParams();
 
   const [timeLeft, setTimeLeft] = useState(30);
+<<<<<<< Updated upstream
   const [slotId, setSlotId] = useState("-");
 
   /* ---------------- TIMER ---------------- */
+=======
+<<<<<<< HEAD
+  const [showTimeout, setShowTimeout] = useState(false);
+=======
+  const [slotId, setSlotId] = useState("-");
+
+  /* ---------------- TIMER ---------------- */
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
+>>>>>>> Stashed changes
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -106,9 +126,27 @@ export default function PlaceUmbrella() {
   }, 1000);
 
   return () => clearInterval(interval);
+<<<<<<< Updated upstream
 
 }, [user_id]);
 
+=======
+
+}, [user_id]);
+
+<<<<<<< HEAD
+useEffect(() => {
+  if (timeLeft === 0) {
+  setShowTimeout(true);
+}
+}, [timeLeft]);
+const formatTime = (sec: number) => {
+  const s = sec.toString().padStart(2, "0");
+  return `00:${s}`;
+};
+=======
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
+>>>>>>> Stashed changes
   return (
     <View style={styles.container}>
 
@@ -124,19 +162,34 @@ export default function PlaceUmbrella() {
         <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
       </View>
 
-      {/* LOCKER ICON */}
       <View style={styles.iconArea}>
+<<<<<<< HEAD
+      <Image source={lockLocker} style={styles.lockerImage} />
+=======
         <LockerIcon size={190} />
 
         <View style={styles.lockBadge}>
           <Ionicons name="lock-closed" size={22} color="white" />
         </View>
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
       </View>
 
-      {/* SLOT ID */}
       <View style={styles.slotBox}>
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+    <Text style={styles.slotText}>A1</Text>
+
+    <Image
+    source={led}
+    style={styles.ledIcon}
+     />
+    </View>
+=======
+>>>>>>> Stashed changes
         <Text style={styles.slotText}>{slotId}</Text>
       </View>
+>>>>>>> e479ae965268528b6bed7552a0c1ae3ca3296e2a
 
       {/* INSTRUCTION */}
       <View style={styles.instructionBox}>
@@ -146,7 +199,7 @@ export default function PlaceUmbrella() {
       </View>
 
       <Text style={styles.desc}>
-        กรุณาวางร่มให้ตรงช่องและดันเข้าไปจนสุด ระบบจะทำการล็อคอัตโนมัติ
+        กรุณาวางร่มให้ตรงช่องที่มีไฟสีเขียวและดันเข้าไปจนสุด ระบบจะทำการล็อคอัตโนมัติ
         ขอบคุณที่ช่วยดูแลร่มสำหรับการใช้งานร่วมกัน
       </Text>
 
@@ -179,7 +232,31 @@ export default function PlaceUmbrella() {
         </View>
 
       </View>
+    {showTimeout && (
+    <View style={styles.overlay}>
+    <View style={styles.popup}>
 
+    <View style={styles.warningCircle}>
+    <Text style={styles.warningText}>!</Text>
+    </View>
+
+    <Text style={styles.timeoutTitle}>หมดเวลา</Text>
+
+    <Text style={styles.timeoutDesc}>
+    ระบบไม่สามารถดำเนินการต่อได้{"\n"}
+    กรุณาเริ่มขั้นตอนการวางร่มใหม่อีกครั้ง
+    </Text>
+
+<TouchableOpacity
+style={styles.retryButton}
+onPress={() => router.replace("/(tabs)/borrow")}
+>
+<Text style={styles.retryText}>ลองอีกครั้ง</Text>
+</TouchableOpacity>
+
+</View>
+</View>
+)}
     </View>
   );
 }
@@ -231,6 +308,12 @@ fontWeight:"700",
 color:"red"
 },
 
+ledIcon:{
+width:55,
+height:100,
+resizeMode:"contain"
+},
+
 iconArea:{
 marginTop:40,
 alignItems:"center",
@@ -252,6 +335,7 @@ width:260,
 height:90,
 backgroundColor:"#000",
 borderRadius:30,
+flexDirection:"row",
 justifyContent:"center",
 alignItems:"center",
 shadowColor:"#000",
@@ -333,6 +417,84 @@ fontSize:10,
 marginTop:4,
 color:"#0a3a73",
 fontWeight:"600"
-}
+},
+
+lockerImage:{
+width:320,
+height:220,
+resizeMode:"contain"
+},
+
+overlay:{
+position:"absolute",
+top:0,
+left:0,
+right:0,
+bottom:0,
+backgroundColor:"rgba(0,0,0,0.55)",
+justifyContent:"center",
+alignItems:"center"
+},
+
+popup:{
+width:320,
+backgroundColor:"#fff",
+borderRadius:40,
+paddingVertical:40,
+alignItems:"center"
+},
+
+warningCircle:{
+width:140,
+height:140,
+borderRadius:70,
+backgroundColor:"#ff0000",
+justifyContent:"center",
+alignItems:"center",
+marginBottom:20
+},
+
+warningText:{
+fontSize:80,
+color:"#fff",
+fontWeight:"700"
+},
+
+timeoutTitle:{
+fontSize:32,
+fontWeight:"700",
+marginBottom:10
+},
+
+timeoutDesc:{
+fontSize:14,
+textAlign:"center",
+marginBottom:30,
+width:220
+},
+
+retryButton:{
+  backgroundColor:"#f2f2f2",
+  paddingVertical:14,
+  paddingHorizontal:50,
+  borderRadius:40,
+
+  // shadow (iOS)
+  shadowColor:"#000",
+  shadowOffset:{
+    width:0,
+    height:4
+  },
+  shadowOpacity:0.25,
+  shadowRadius:4,
+
+  // shadow (Android)
+  elevation:6
+},
+
+retryText:{
+fontSize:22,
+fontWeight:"600"
+},
 
 });
